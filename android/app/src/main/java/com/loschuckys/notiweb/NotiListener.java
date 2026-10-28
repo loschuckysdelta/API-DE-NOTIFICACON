@@ -24,9 +24,13 @@ public class NotiListener extends NotificationListenerService {
     @Override public void onListenerConnected() {
         super.onListenerConnected();
         if (worker != null) worker.shutdownNow();
+        Prefs.prefs(this).edit().putBoolean("listenerConnected", true).apply();
         worker = Executors.newSingleThreadScheduledExecutor();
         // Reintenta las notificaciones pendientes cuando el teléfono vuelve a tener internet.
-        worker.scheduleWithFixedDelay(() -> NotiSync.poll(this), 0, 30, TimeUnit.SECONDS);
+        worker.scheduleWithFixedDelay(() -> {
+            try { NotiSync.poll(getApplicationContext()); }
+            catch (Exception ignored) { /* Mantener los reintentos programados. */ }
+        }, 0, 30, TimeUnit.SECONDS);
     }
     @Override public void onNotificationPosted(StatusBarNotification sbn) {
         SharedPreferences p = Prefs.prefs(this);
@@ -74,7 +78,12 @@ public class NotiListener extends NotificationListenerService {
             return out.toString();
         } catch (Exception e) { return ""; }
     }
+    @Override public void onListenerDisconnected() {
+        Prefs.prefs(this).edit().putBoolean("listenerConnected", false).apply();
+        super.onListenerDisconnected();
+    }
     @Override public void onDestroy() {
+        Prefs.prefs(this).edit().putBoolean("listenerConnected", false).apply();
         if (worker != null) worker.shutdownNow();
         super.onDestroy();
     }

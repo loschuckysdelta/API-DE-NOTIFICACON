@@ -70,6 +70,10 @@ public final class NotiSync {
             String token = p.getString("token", "");
             if (!base.startsWith("https://") || token.length() < 32) return;
             refreshPolicy(context, base, token);
+            // Registra el celular en MongoDB, incluso si todavía no hay avisos nuevos.
+            if (System.currentTimeMillis() - p.getLong("heartbeatSentAt", 0L) > 60_000L) {
+                if (sendHeartbeat(context, base, token)) p.edit().putLong("heartbeatSentAt", System.currentTimeMillis()).apply();
+            }
             // Enviar solamente nombres y paquetes de apps visibles en el lanzador de Android.
             if (System.currentTimeMillis() - p.getLong("catalogSentAt", 0L) > 6L * 3600_000L) {
                 if (sendCatalog(context, base, token)) p.edit().putLong("catalogSentAt", System.currentTimeMillis()).apply();
@@ -83,9 +87,48 @@ public final class NotiSync {
             if (r.status == 200) {
                 JSONObject body = new JSONObject(r.body);
                 JSONArray allowed = body.optJSONArray("allowedApps");
-                if (body.optBoolean("ok", false) && allowed != null) AppPolicy.apply(context, allowed);
+                if (body.optBoolean("ok", false) && allowed != null) {
+                    AppPolicy.apply(context, allowed);
+                    setState(context, "✅ API y MongoDB responden · " + allowed.length() + " apps permitidas");
+                    return;
+                }
             }
-        } catch (Exception ignored) { /* Política anterior caduca: en duda, no exportar. */ }
+            setState(context, r.status == 401 ? "❌ Token incorrecto (HTTP 401)" :
+                r.status == 503 ? "❌ MongoDB o API no disponible (HTTP 503)" :
+                "❌ Error de API (HTTP " + r.status + ")");
+        } catch (Exception ignored) {
+            setState(context, "❌ Sin conexión a la API HTTPS");
+            /* En duda, no exportar datos privados. */
+        }
+    }
+    private static void setState(Context context, String state) {
+        Prefs.prefs(context).edit().putString("lastConnectionStatus", state).apply();
+    }
+    public static String testConnection(Context context) {
+        SharedPreferences p = Prefs.prefs(context);
+        String base = p.getString("url", ""), token = p.getString("token", "");
+        if (!base.startsWith("https://") || token.length() < 32) return "❌ Configura URL HTTPS y INGEST_TOKEN";
+        synchronized (SEND_LOCK) {
+            refreshPolicy(context, base, token);
+            if (AppPolicy.isFresh(context)) {
+                if (!sendCatalog(context, base, token)) return "⚠️ API conectada, pero no se pudo registrar lista de apps";
+                if (p.getBoolean("enabled", false) && !sendHeartbeat(context, base, token))
+                    return "⚠️ Política recibida, pero falló registro de celular";
+            }
+            return p.getString("lastConnectionStatus", "Sin diagnóstico");
+        }
+    }
+    private static boolean sendHeartbeat(Context context, String base, String token) {
+        try {
+            SharedPreferences p = Prefs.prefs(context);
+            JSONObject payload = new JSONObject();
+            payload.put("deviceId", Prefs.deviceId(context));
+            payload.put("deviceName", p.getString("name", "Mi Android"));
+            payload.put("enabled", p.getBoolean("enabled", false));
+            payload.put("listenerConnected", p.getBoolean("listenerConnected", false));
+            Response r = call(base + "/api/device-status", token, "POST", payload.toString());
+            return r.status == 200;
+        } catch (Exception ignored) { return false; }
     }
     private static boolean sendCatalog(Context context, String base, String token) {
         try {

@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
         formParam.topMargin = 14;
         layout.addView(form, formParam);
 
-        url = field(form, "URL de Vercel (HTTPS)", Prefs.prefs(this).getString("url", "https://tu-proyecto.vercel.app"), false);
+        url = field(form, "URL de Vercel (HTTPS)", Prefs.prefs(this).getString("url", "https://api-de-notificacion.vercel.app"), false);
         token = field(form, "Token privado de envío (INGEST_TOKEN)", Prefs.prefs(this).getString("token", ""), true);
         name = field(form, "Nombre de este celular", Prefs.prefs(this).getString("name", "Mi Android"), false);
         TextView help = text("Controla qué apps se permiten desde el panel de Vercel. Todas están bloqueadas por defecto. NotiWeb enviará solo los nombres de apps visibles en el lanzador para que puedas elegirlas en el panel.", 12, false);
@@ -115,6 +115,15 @@ public class MainActivity extends Activity {
             toast("Envío activado. Las nuevas notificaciones se sincronizarán.");
             showStatus();
         });
+        Button check = button(layout, "3. COMPROBAR CONEXIÓN Y SINCRONIZAR APPS");
+        check.setOnClickListener(v -> {
+            if (!save()) return;
+            check.setEnabled(false);
+            new Thread(() -> {
+                String result = NotiSync.testConnection(getApplicationContext());
+                runOnUiThread(() -> { check.setEnabled(true); showStatus(); toast(result); });
+            }).start();
+        });
         Button pause = button(layout, "⏸ Pausar envío");
         pause.setOnClickListener(v -> {
             Prefs.prefs(this).edit().putBoolean("enabled", false).apply();
@@ -127,7 +136,7 @@ public class MainActivity extends Activity {
         layout.addView(listenerStatus);
         status = text("", 14, false);
         layout.addView(status);
-        TextView privacy = text("🔒 El teléfono envía datos únicamente a tu URL HTTPS. Nunca compartas el token. Puedes revocar el permiso desde Ajustes de Android.", 12, false);
+        TextView privacy = text("🔒 SOLO notificaciones nuevas de apps permitidas. No accedemos a los movimientos internos de un banco. Nunca compartas el token. Puedes pausar el envío o revocar el permiso desde Ajustes de Android. Los avisos de pago no son comprobantes verificados.", 12, false);
         privacy.setTextColor(pale);
         layout.addView(privacy);
         showStatus();
@@ -152,6 +161,7 @@ public class MainActivity extends Activity {
         if (!oldUrl.equals(u) || !oldToken.equals(t)) {
             AppPolicy.invalidate(this);
             NotiSync.clearQueue(this);
+            Prefs.prefs(this).edit().remove("heartbeatSentAt").remove("catalogSentAt").apply();
         }
         toast("Configuración guardada");
         return true;
@@ -161,7 +171,10 @@ public class MainActivity extends Activity {
         boolean granted = hasPermission();
         boolean enabled = Prefs.prefs(this).getBoolean("enabled", false);
         listenerStatus.setText(granted ? "✅ Permiso de notificaciones: concedido" : "⚠️ Permiso de notificaciones: pendiente");
-        status.setText(enabled && granted ? (AppPolicy.isFresh(this) ? "🟢 Envío activo · filtros de Vercel aplicados" : "🟠 Activado: esperando reglas de Vercel") : "⚪ Envío PAUSADO / sin permiso");
+        String listener = Prefs.prefs(this).getBoolean("listenerConnected", false) ? " · lector conectado" : " · lector esperando conexión";
+        String last = Prefs.prefs(this).getString("lastConnectionStatus", "Sin prueba de conexión todavía");
+        status.setText((enabled && granted ? (AppPolicy.isFresh(this) ? "🟢 Envío activo" : "🟠 Esperando filtros de Vercel") : "⚪ Envío PAUSADO / sin permiso")
+            + listener + "\n" + last);
     }
     @Override protected void onResume() { super.onResume(); showStatus(); }
 }

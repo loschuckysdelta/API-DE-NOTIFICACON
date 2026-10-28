@@ -1,5 +1,8 @@
 # NotiWeb — API de notificaciones Android + MongoDB + Vercel
 
+**ACTUALIZACIÓN IMPORTANTE:** consulta [GUIA-INSTALACION-REAL.md](GUIA-INSTALACION-REAL.md) para compilar el APK nativo y comprobar los permisos reales. Esta versión agrega el registro de teléfonos `/api/device-status`, el botón de diagnóstico en Android y el workflow `.github/workflows/compilar-apk.yml`. **No contiene APK ya compilado**; la instalación web de Chrome NO lee notificaciones de otras aplicaciones.
+
+
 Proyecto para **tus propios teléfonos Android**, con acceso a notificaciones concedido expresamente. Tiene un panel web de administrador y API Node.js para Vercel, MongoDB Atlas y código fuente del lector Android.
 
 ## Estructura CORREGIDA (sube el contenido completo al nivel principal del repositorio)
@@ -84,7 +87,7 @@ Si `/` da 404, comprueba **Root Directory = `./`**, que `public/index.html` est�
 
 ## 4. Instalar la app Android
 
-La versión web y la API funcionan en Vercel; **Vercel no puede leer notificaciones del móvil por sí mismo**. El lector del teléfono está en `android/` y requiere compilarse en Android Studio (no contiene APK precompilado ni Gradle Wrapper JAR). Dependiendo de tu configuración, tendrás que generar el Gradle Wrapper para sincronizar el proyecto.
+La versión web y la API funcionan en Vercel; **Vercel no puede leer notificaciones del móvil por sí mismo**. El lector del teléfono está en `android/` y requiere compilarse en Android Studio o con la acción de GitHub incluida (no contiene APK precompilado ni Gradle Wrapper JAR). Dependiendo de tu configuración, tendrás que generar el Gradle Wrapper para sincronizar el proyecto.
 
 1. Abre `android/` en Android Studio; instala SDK de Android 35, JDK 17 y Gradle 8.13 o genera su wrapper.
 2. Compila e instala en tu propio teléfono Android.
@@ -98,6 +101,9 @@ Por defecto **todas las apps están bloqueadas**. La app solo lee título y text
 Los avisos de pagos son **texto de notificación, no confirmaciones bancarias**. No utilices el historial para verificar dinero recibido; verifica en la app bancaria original.
 
 ## API
+
+`GET /api/device-status` permite consultar celulares desde una sesión administrativa; `POST /api/device-status` permite al APK registrar su conexión con `INGEST_TOKEN`.
+
 
 | Método | Ruta | Uso | Autorización |
 |---|---|---|---|

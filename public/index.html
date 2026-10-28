@@ -11,7 +11,7 @@
     <div class="installBadge" aria-hidden="true">📲</div>
     <div class="installBody">
       <h2 id="installTitle">Instala NotiWeb en tu celular</h2>
-      <p>Elige si quieres instalar el <b>panel web</b> como app o descargar el <b>APK Android</b> que lee notificaciones con tu permiso.</p>
+      <p>La aplicación <b>Android nativa</b> lee notificaciones de tus aplicaciones autorizadas, con permiso especial del sistema. El panel web solamente consulta MongoDB.</p>
       <div class="installActions">
         <button id="installPwa" type="button">📲 Instalar panel como app</button>
         <button id="downloadApk" type="button" class="outline">⬇ Descargar APK Android</button>
@@ -26,6 +26,7 @@
   <main id="panel" hidden>
     <div class="toolbar"><h2>Centro de notificaciones</h2><div class="buttons"><button id="refresh" type="button">↻ Actualizar</button><button id="logout" type="button" class="outline">Cerrar sesión</button></div></div>
     <div class="stats"><div><small>Total en MongoDB</small><strong id="count">0</strong></div><div><small>Últimas 24 horas</small><strong id="today">0</strong></div><div><small>Celulares con registros</small><strong id="devices">0</strong></div><div><small>Posibles pagos*</small><strong id="payments">0</strong></div></div>
+    <section class="permissionCard" aria-labelledby="deviceTitle"><div class="permissionHeader"><div><h2 id="deviceTitle">📱 Estado de mis celulares Android</h2><p>Conexión de la aplicación nativa. Un celular puede aparecer aquí antes de recibir notificaciones.</p></div></div><div id="deviceStatusList" class="appList" aria-live="polite"><p class="appEmpty">Esperando la primera conexión del APK…</p></div></section>
     <section class="permissionCard" aria-labelledby="permissionTitle">
       <div class="permissionHeader"><div><h2 id="permissionTitle">⚙️ Control de aplicaciones</h2>
         <p>Activa solamente las apps que deseas guardar en MongoDB. Las demás se ignoran en el teléfono. Los cambios pueden tardar hasta 30–60 segundos en sincronizarse.</p></div>

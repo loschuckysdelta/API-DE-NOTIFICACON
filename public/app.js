@@ -35,6 +35,7 @@ async function refresh() {
     showToast('Sincronizado: ' + new Date().toLocaleTimeString('es-PE'));
     render();
     if (!applications.length) await refreshApps();
+    await refreshDeviceStatus();
   } catch (err) {
     if (err.message.includes('Inicia sesión') || err.message.includes('No autorizado')) {
       login.hidden = false; panel.hidden = true;
@@ -193,3 +194,30 @@ $('manualAdd').addEventListener('submit', async (e) => {
   } catch (err) { showToast(err.message); }
   finally { updatingApps = false; $('addApp').disabled = false; renderApps(); }
 });
+
+async function refreshDeviceStatus() {
+  const container = $('deviceStatusList');
+  if (!container) return;
+  try {
+    const { devices: connected = [] } = await request('/api/device-status');
+    container.replaceChildren();
+    if (!connected.length) {
+      const p = document.createElement('p'); p.className = 'appEmpty';
+      p.textContent = 'Todavía no se registró ningún APK. Abre NotiWeb Android, concede acceso a notificaciones, configura la URL y el token y pulsa «Iniciar envío».';
+      container.append(p); return;
+    }
+    for (const d of connected) {
+      const row = document.createElement('div'); row.className = 'appItem';
+      const left = document.createElement('div');
+      const name = document.createElement('div'); name.className = 'appName'; name.textContent = d.name || 'Mi Android';
+      const detail = document.createElement('small'); detail.className = 'appDetail';
+      const seconds = (Date.now() - new Date(d.lastSeenAt).getTime()) / 1000;
+      detail.textContent = (seconds >= 0 && seconds < 120 && d.enabled && d.listenerConnected ? '🟢 Conectado' : '⚪ Sin conexión reciente')
+        + ' · Última comunicación: ' + new Date(d.lastSeenAt).toLocaleString('es-PE');
+      left.append(name,detail); row.append(left); container.append(row);
+    }
+  } catch (err) {
+    const p = document.createElement('p'); p.className = 'appEmpty'; p.textContent = 'No se pudo consultar el estado de los celulares: ' + err.message;
+    container.replaceChildren(p);
+  }
+}
