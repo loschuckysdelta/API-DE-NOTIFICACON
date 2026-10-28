@@ -57,7 +57,7 @@
       anchor.remove();
       setInfo('Se inició la descarga del APK. Instálalo solo si proviene de tu propio proyecto y verificaste su origen.');
     } catch {
-      setInfo('El APK todavía no está publicado. Compílalo en Android Studio y sube el archivo a public/downloads/NotiWeb.apk en GitHub. Luego vuelve a desplegar en Vercel.');
+      setInfo('El APK todavía no está publicado. En GitHub abre Actions → «Compilar y publicar APK Android NotiWeb» → Run workflow. Al completar, se guardará public/downloads/NotiWeb.apk y Vercel podrá publicarlo. Si falla, revisa el registro del workflow.');
     } finally { native.disabled = false; }
   });
   if ('serviceWorker' in navigator && location.protocol === 'https:') {

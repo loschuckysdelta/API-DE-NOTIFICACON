@@ -1,1 +1,1 @@
-Si compilaste tu APK Android nativo, copia el fichero de salida aquí con el nombre exacto NotiWeb.apk. No subas contraseñas ni claves a esta carpeta.
+El archivo NotiWeb.apk se genera automáticamente con GitHub Actions: Compilar y publicar APK Android NotiWeb. No coloques aquí contraseñas ni tokens. Hasta ejecutar la acción no existe APK descargable. El APK generado es DEBUG para pruebas personales; para distribución o actualizaciones estables configura una compilación release firmada con tu clave privada.

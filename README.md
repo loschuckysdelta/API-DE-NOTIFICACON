@@ -1,3 +1,5 @@
+**NUEVO:** Para corregir el aviso «El APK todavía no está publicado», lee [GUIA-PUBLICAR-APK.md](GUIA-PUBLICAR-APK.md). El workflow compila y publica automáticamente el APK desde GitHub Actions; sigue siendo necesario ejecutarlo en tu repositorio.
+
 # NotiWeb — API de notificaciones Android + MongoDB + Vercel
 
 **ACTUALIZACIÓN IMPORTANTE:** consulta [GUIA-INSTALACION-REAL.md](GUIA-INSTALACION-REAL.md) para compilar el APK nativo y comprobar los permisos reales. Esta versión agrega el registro de teléfonos `/api/device-status`, el botón de diagnóstico en Android y el workflow `.github/workflows/compilar-apk.yml`. **No contiene APK ya compilado**; la instalación web de Chrome NO lee notificaciones de otras aplicaciones.

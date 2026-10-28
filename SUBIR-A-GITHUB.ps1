@@ -13,7 +13,7 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
 }
 git clone 'https://github.com/loschuckysdelta/API-DE-NOTIFICACION.git' $repo
 if ($LASTEXITCODE -ne 0) { throw 'No se pudo clonar el repositorio; verifica tu acceso.' }
-foreach ($folder in @('api','lib','public','android','tests')) {
+foreach ($folder in @('api','lib','public','android','tests','.github')) {
     $target = Join-Path $repo $folder
     New-Item -ItemType Directory -Path $target -Force | Out-Null
     Copy-Item -Path (Join-Path (Join-Path $source $folder) '*') -Destination $target -Recurse -Force
@@ -23,10 +23,10 @@ foreach ($file in @('package.json','vercel.json','.gitignore','.env.example','RE
 }
 Push-Location $repo
 try {
-    git add api lib public android tests package.json vercel.json .gitignore .env.example README.md
-    git commit -m 'Corregir estructura Vercel y API de NotiWeb'
+    git add api lib public android tests .github package.json vercel.json .gitignore .env.example README.md
+    git commit -m 'Publicar compilador automático del APK NotiWeb'
     if ($LASTEXITCODE -ne 0) { Write-Host 'No hay cambios nuevos para confirmar o falta configurar Git.'; exit 1 }
     git push origin main
     if ($LASTEXITCODE -ne 0) { throw 'Error al enviar al repositorio. Comprueba tu autenticacion de GitHub.' }
-    Write-Host 'Archivos enviados. En Vercel: Root Directory = ./, Framework Preset = Other, Redeploy.'
+    Write-Host 'Archivos enviados. Abre GitHub > Actions > Compilar y publicar APK Android NotiWeb > Run workflow. GitHub compilara y publicara public/downloads/NotiWeb.apk; Vercel normalmente despliega el nuevo commit.'
 } finally { Pop-Location }
