@@ -2,9 +2,23 @@
 <html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="theme-color" content="#130b1b"/><meta name="robots" content="noindex, nofollow"/>
 <title>NotiWeb · Los Chuckys</title>
-<link rel="stylesheet" href="/styles.css"/><script defer src="/app.js"></script></head>
+<link rel="manifest" href="/manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+<link rel="stylesheet" href="/styles.css"/><script defer src="/install.js"></script><script defer src="/app.js"></script></head>
 <body><div class="shell">
   <header><div class="mark">🔔</div><div><span class="eyebrow">LOS CHUCKYS · SISTEMA PRIVADO</span><h1>Noti<span>Web</span></h1><p>Notificaciones Android sincronizadas con MongoDB</p></div></header>
+  <section class="installCard" aria-labelledby="installTitle">
+    <div class="installBadge" aria-hidden="true">📲</div>
+    <div class="installBody">
+      <h2 id="installTitle">Instala NotiWeb en tu celular</h2>
+      <p>Elige si quieres instalar el <b>panel web</b> como app o descargar el <b>APK Android</b> que lee notificaciones con tu permiso.</p>
+      <div class="installActions">
+        <button id="installPwa" type="button">📲 Instalar panel como app</button>
+        <button id="downloadApk" type="button" class="outline">⬇ Descargar APK Android</button>
+      </div>
+      <p id="installInfo" class="installInfo" role="status">El panel web no puede leer notificaciones de otras apps; para eso se necesita el APK lector de Android.</p>
+    </div>
+  </section>
   <div id="message" class="feedback" role="status">Conectando con el servidor...</div>
   <section id="login" class="loginBox"><h2>🔐 Iniciar sesión</h2><p>Este panel muestra mensajes privados de tus dispositivos. Entra con tu contraseña de administrador.</p>
     <form id="loginForm"><label for="password">Contraseña del panel</label><input id="password" type="password" autocomplete="current-password" minlength="12" placeholder="Contraseña segura" required/><button type="submit">Entrar al panel</button></form>

@@ -73,3 +73,15 @@ button.danger { background:#4c1b2c; border-color:#98506a; }
 footer {display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px;margin-top:25px;padding-top:18px;border-top:1px solid var(--line);}
 @media(max-width:900px) {.stats{grid-template-columns:repeat(2,minmax(0,1fr));}.appList{grid-template-columns:1fr;}.manualFields{grid-template-columns:1fr 1fr;}.manualFields button{grid-column:1/-1;}}
 @media(max-width:640px) {.shell{padding:15px 14px 35px;}header{gap:12px;}header .mark{width:56px;height:56px;border-radius:16px;font-size:27px}.eyebrow{font-size:9px;letter-spacing:1px}.toolbar,.permissionHeader{align-items:stretch;flex-direction:column}.toolbar .buttons button{flex:1}.stats>div{padding:15px}.stats strong{font-size:28px}.permissionCard{padding:15px}.manualFields,.filters{grid-template-columns:1fr}.appItem{align-items:flex-start;gap:8px}.appRight{flex-wrap:wrap;justify-content:flex-end}.appToggle{min-width:80px}.listhead{align-items:flex-start;flex-direction:column}.notification .line{align-items:flex-start;flex-direction:column}footer{flex-direction:column;align-items:stretch}}
+
+/* Instalación del panel y enlace del APK nativo */
+.installCard { display:flex;align-items:center;gap:18px;margin:10px 0 20px;padding:20px;border-radius:18px;background:linear-gradient(115deg,#2b173d,#181025 70%);border:1px solid #6d4192;box-shadow:0 10px 40px #0003; }
+.installBadge { width:66px;height:66px;flex:0 0 66px;border-radius:17px;background:#44215b;display:grid;place-items:center;font-size:33px; }
+.installBody { flex:1;min-width:0; }
+.installBody h2 { font-size:20px;margin:0 0 4px; }
+.installBody p { font-size:13px;color:var(--muted);margin:4px 0 12px;line-height:1.55; }
+.installBody b { color:var(--text); }
+.installActions { display:flex;flex-wrap:wrap;gap:10px; }
+.installActions button { min-height:46px; }
+.installBody .installInfo { margin:10px 0 0;color:#e2c7f3; }
+@media(max-width:640px) { .installCard{gap:11px;align-items:flex-start;padding:15px;} .installBadge{width:43px;height:43px;flex-basis:43px;font-size:23px;border-radius:12px;} .installActions{flex-direction:column;} .installActions button{width:100%;} .installBody h2{font-size:18px;} }

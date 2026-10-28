@@ -130,3 +130,12 @@ Este proyecto es para dispositivos propios o para los que tengas consentimiento 
 **Corrección de estilos:** el archivo `public/styles.css` se ha reconstruido como CSS válido; corrige el panel que aparecía sin estilos en el teléfono.
 
 **Despliegue:** en el repositorio usa el contenido del ZIP en la raíz (`api/`, `lib/`, `public/`, etc.) y Vercel Root Directory `./`. Conserva tus variables de entorno privadas en Vercel; no están dentro del ZIP. Tras subir a GitHub, haz **Redeploy**.
+
+## Botones de instalación para Android y PWA
+
+Ahora el panel muestra dos botones desde la página de inicio:
+
+1. **Instalar panel como app**: abre el instalador de la **versión web PWA** de Chrome Android cuando el navegador lo permite. En otros navegadores muestra instrucciones de menú. Esta versión abre el panel, **no puede acceder a las notificaciones de otras aplicaciones**. Los archivos PWA son `public/manifest.webmanifest`, `public/sw.js`, `public/install.js` e iconos PNG. El service worker solamente almacena los iconos; nunca guarda la API ni mensajes privados.
+2. **Descargar APK Android**: comprobará que exista **un APK real** servido en `/downloads/NotiWeb.apk`. Si no existe, mostrará cómo publicarlo y **no fingirá que se descargó**. Para activarlo, primero compila tu proyecto `android/` en Android Studio; renombra el resultado a `NotiWeb.apk` y colócalo en `public/downloads/NotiWeb.apk` dentro de GitHub, después despliega a Vercel. El proyecto no incluye un binario `.apk` ya compilado.
+
+**Seguridad:** ni el APK ni la PWA deben llevar contraseñas de MongoDB ni `INGEST_TOKEN` incrustados. Los introduce el dueño del dispositivo. La PWA es solo el panel; la lectura de notificaciones requiere **la app Android nativa**, permiso explícito y lista de aplicaciones autorizadas.
