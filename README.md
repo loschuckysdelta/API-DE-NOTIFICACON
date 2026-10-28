@@ -1,82 +1,120 @@
-# 🔔 NotiWeb — panel de permisos por aplicación
+# NotiWeb — API de notificaciones Android + MongoDB + Vercel
 
-Proyecto de código fuente: `web/` (API de Vercel + MongoDB Atlas + panel protegido) y `android/` (app que escucha notificaciones en **Android del propietario**).
+Proyecto para **tus propios teléfonos Android**, con acceso a notificaciones concedido expresamente. Tiene un panel web de administrador y API Node.js para Vercel, MongoDB Atlas y código fuente del lector Android.
 
-**Importante**: no contiene APK ni enlace desplegado ni conexión a MongoDB activa. Necesitas configurar tus propias credenciales y compilar la app.
+## Estructura CORREGIDA (sube el contenido completo al nivel principal del repositorio)
 
-## Cómo funciona el control
+```text
+API-DE-NOTIFICACION/
+├── api/                 # funciones HTTP de Vercel
+├── lib/                 # lógica privada, no endpoints públicos
+├── public/
+│   ├── index.html       # panel privado
+│   ├── app.js
+│   └── styles.css
+├── android/             # código fuente Android, NO se ejecuta en Vercel
+├── tests/
+├── package.json
+├── vercel.json
+└── .env.example         # sin contraseñas reales
+```
 
-- Cuando enciendes la app Android y aceptas su permiso, la app envía al servidor **solo los nombres y paquetes de las apps que aparecen en el lanzador**, sin sus mensajes, para mostrar opciones en el panel.
-- En el panel puedes elegir `Permitir` o `Ignorar` por app. **Por defecto todas están desactivadas.** Puedes buscar "WhatsApp", "Lemon", "Yape" u otras apps que tengas instaladas.
-- El Android consulta las reglas cada 30 segundos y aplica el filtro **ANTES de leer el título y el texto** de una notificación. Si está desactivada, no guarda el mensaje ni lo envía a la nube.
-- **La API revisa otra vez la regla de permisos** antes de guardar en MongoDB, incluso si el teléfono todavía no recibió el cambio.
-- La app descarta mensajes de acceso/OTP reconocibles, pero el filtro no puede garantizar excluir todo dato confidencial.
-- `Borrar datos` elimina desde la web los registros **anteriores** de una app. Apagar el interruptor no borra automáticamente sus registros históricos.
-- La app puede permanecer sin conexión. La cola local de notificaciones permitidas tiene límite de 150; antes de enviarla, vuelve a comprobar reglas. Si las reglas no pueden actualizarse durante 90 segundos, se suspende la captura y el envío (puede haber huecos en el historial).
-- El panel usa reglas **globales para todos tus teléfonos**. No incluye ajustes distintos para cada móvil.
+**No subas este ZIP sin descomprimir como único archivo de GitHub**: GitHub necesita los archivos dentro de las carpetas indicadas. No uses la versión antigua con `web/` para este paquete: los ficheros de Vercel van **directamente en la raíz**.
 
-### Ejemplo
+## 1. Subir los archivos al repositorio existente
 
-En el panel verás algo como:
+Recomendado: desde tu PC con Git instalado, abre PowerShell:
 
-| Aplicación | Guardar notificaciones | Resultado |
-|---|---|---|
-| WhatsApp | ❌ Ignorar | No se envían mensajes de WhatsApp |
-| Lemon | ✅ Permitir | Se envían las notificaciones nuevas que Android muestre de Lemon |
-| Yape | ❌ Ignorar | No se envían mensajes de Yape |
+```powershell
+git clone https://github.com/loschuckysdelta/API-DE-NOTIFICACION.git
+```
 
-> Si una notificación menciona "Juan envió S/ 200", puede interpretarse como **posible** pago, pero **no verifica que el dinero se haya recibido**.
+Descomprime este ZIP y copia **todos sus archivos y carpetas** dentro de la carpeta `API-DE-NOTIFICACION` clonada, reemplazando los archivos anteriores. En PowerShell, desde el directorio que contiene la carpeta clonada:
 
-## Publicar web + API
+```powershell
+cd API-DE-NOTIFICACION
+git add .
+git commit -m "Corregir NotiWeb API MongoDB y panel para Vercel"
+git push origin main
+```
 
-1. Crea un clúster de MongoDB Atlas en https://cloud.mongodb.com, un usuario con acceso `readWrite` limitado a la base `notiweb` y habilita el acceso de red adecuado para el backend Vercel.
-2. Descomprime el ZIP y abre PowerShell en **`web/`**.
-3. Ejecuta `npm install`, `npm install -g vercel`, `vercel login` y `vercel`.
-4. En tu proyecto de Vercel, ve a **Settings → Environment Variables** y agrega (para Production):
-   - `MONGODB_URI`: URI de MongoDB Atlas (privada)
-   - `MONGODB_DB`: `notiweb`
-   - `ADMIN_PASSWORD`: clave robusta de administrador (mínimo 12 caracteres)
-   - `SESSION_SECRET`: valor aleatorio de 32 bytes o más
-   - `INGEST_TOKEN`: otro token distinto de 32 bytes o más, compartido con tus Android
-   - `READ_TOKEN`: token distinto, opcional para consultas externas
-5. Para generar `SESSION_SECRET`, `INGEST_TOKEN` y `READ_TOKEN`, ejecuta **tres veces** este comando en PowerShell y usa un valor nuevo para cada variable:
+**IMPORTANTE:** el repositorio anterior tenía `web/`. Puedes dejarlo temporalmente, pero usa `./` como Root Directory porque este paquete coloca `api/`, `public/`, `lib/` y `vercel.json` en la raíz del repositorio.
 
-   `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+## 2. Configuración del proyecto Vercel
 
-6. Ejecuta `vercel --prod` desde la carpeta `web/`, luego entra a `https://TU-SITIO.vercel.app` e inicia sesión con `ADMIN_PASSWORD`.
+Abre https://vercel.com/los-chuckys-delta/api-de-notificacion/settings
 
-**No pongas MONGODB_URI ni tokens en `public/`, HTML o repositorios públicos.**
+- **Root Directory:** `./` o campo vacío (raíz del repositorio; NO `web`).
+- **Framework Preset:** `Other`.
+- **Build Command, Output Directory e Install Command:** sin personalizar.
+- **Node.js:** 20 o una versión compatible superior.
+- **Environment Variables:** pega variables por separado en Settings > Environment Variables (no las guardes en el repositorio).
 
-## Instalar el lector Android
+Variables:
 
-1. Abre la carpeta **`android/`** con Android Studio (JDK 17, SDK Android 35). El ZIP no trae wrapper JAR ni APK precompilado: puede ser necesario crear el wrapper Gradle desde Android Studio.
-2. Compila desde **Build → Build APK(s)** e instala el APK en tu Android propio.
-3. Introduce tu URL HTTPS de Vercel, `INGEST_TOKEN` y el nombre del teléfono.
-4. Pulsa **Conceder acceso a notificaciones** y autoriza NotiWeb en ajustes de Android.
-5. Pulsa **Iniciar envío a MongoDB**. Espera la publicación del catálogo de apps y abre el panel web.
-6. Pulsa **Actualizar apps**, busca las apps y activa únicamente las que quieres. Por ejemplo, activa Lemon y deja WhatsApp en **Ignorar**.
-7. A partir de la siguiente actualización de reglas (normalmente dentro de 30 s), las nuevas notificaciones de apps permitidas aparecerán en MongoDB y en el panel.
+```env
+MONGODB_URI=mongodb+srv://USUARIO:CLAVE@CLUSTER.mongodb.net/notiweb?retryWrites=true&w=majority
+MONGODB_DB=notiweb
+ADMIN_PASSWORD=CONTRASENA_LARGA_UNICA
+SESSION_SECRET=UN_SECRETO_ALEATORIO_LARGO
+INGEST_TOKEN=OTRO_TOKEN_ALEATORIO_LARGO
+READ_TOKEN=TERCER_TOKEN_ALEATORIO_LARGO
+```
 
-Puedes pulsar **Pausar envío** desde Android, o revocar el permiso en Ajustes del sistema en cualquier momento.
+En PowerShell genera secretos individuales con este comando (ejecútalo 3 veces):
 
-## Endpoints privados
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
-| Método | Ruta | Función |
-|---|---|---|
-| `GET` | `/api/apps` | Lista apps descubiertas y estado (sesión de administrador) |
-| `POST` | `/api/apps` | Cambia permiso de una app: `{ "appPackage": "com.whatsapp", "enabled": false }` (sesión) |
-| `GET` | `/api/device-config` | Obtiene apps permitidas (Bearer INGEST_TOKEN) |
-| `POST` | `/api/device-catalog` | Publica nombres de apps detectadas (Bearer INGEST_TOKEN) |
-| `POST` | `/api/ingest` | Guarda una notificación solamente si está permitida (Bearer INGEST_TOKEN) |
-| `GET` | `/api/notifications` | Historial (sesión o Bearer READ_TOKEN) |
-| `DELETE` | `/api/notifications?app=com.whatsapp` | Borra historial de una app (sesión) |
-| `GET` | `/api/stats` | Totales por app, celular y posibles pagos (sesión o READ_TOKEN) |
-| `POST` | `/api/login` | Iniciar sesión |
-| `POST` | `/api/logout` | Cerrar sesión |
-| `GET` | `/api/health` | Confirma que el servicio responde, no comprueba MongoDB |
+`ADMIN_PASSWORD`: usa un valor privado de más de 12 caracteres. Las otras claves de sesión y tokens deben ser de 32 caracteres o más; **no deben ser iguales**.
 
-Todos los registros de notificación expiran en 30 días. Debes ser el propietario del dispositivo o tener el consentimiento informado de su propietario para instalar y activar el lector. Las notificaciones antiguas anteriores a la instalación no se recuperan. Para accesos de varias personas o un entorno de producción más amplio, añade credenciales individuales por teléfono, protección anti-fuerza bruta y medidas de privacidad adicionales.
+En MongoDB Atlas, crea un usuario con permisos de lectura/escritura solamente en la base `notiweb`, agrega las IP de salida de Vercel a la lista de acceso (si es necesario) y comprueba la contraseña. Si una contraseña, URI o token se compartió en un chat, **cámbialo antes de usar en producción**. No copies credenciales dentro del código, ni dentro de `public/`, ni al README.
 
-## Comprobación local
+Guarda variables para **Production** y ejecuta **Deployments → Redeploy** después de actualizar GitHub.
 
-En `web/`: `npm test`. Hay pruebas unitarias de interpretación de notificaciones, pero **no** se ha hecho aquí una prueba real con MongoDB Atlas, Vercel o un APK instalado.
+## 3. Comprobación de Vercel
+
+- `https://TU-DOMINIO.vercel.app/` → panel de inicio de sesión.
+- `https://TU-DOMINIO.vercel.app/api/health` → `{"ok":true,"service":"NotiWeb API"}` sin consulta a base de datos.
+- `https://TU-DOMINIO.vercel.app/api/health?db=1` → comprobación de MongoDB **requiere sesión del administrador** (si no has iniciado sesión, devuelve 401).
+- Tras iniciar sesión, el panel debe mostrar los datos de MongoDB o un mensaje de error de conexión.
+
+Si `/` da 404, comprueba **Root Directory = `./`**, que `public/index.html` está en el repositorio y que **Output Directory no esté personalizada**. Si `/api/health` da 404, comprueba la carpeta `api/` en la raíz y el despliegue de los commits.
+
+## 4. Instalar la app Android
+
+La versión web y la API funcionan en Vercel; **Vercel no puede leer notificaciones del móvil por sí mismo**. El lector del teléfono está en `android/` y requiere compilarse en Android Studio (no contiene APK precompilado ni Gradle Wrapper JAR). Dependiendo de tu configuración, tendrás que generar el Gradle Wrapper para sincronizar el proyecto.
+
+1. Abre `android/` en Android Studio; instala SDK de Android 35, JDK 17 y Gradle 8.13 o genera su wrapper.
+2. Compila e instala en tu propio teléfono Android.
+3. Escribe la URL HTTPS de Vercel, tu `INGEST_TOKEN` y un nombre de teléfono.
+4. Abre los ajustes para conceder el **acceso a notificaciones** a NotiWeb y pulsa **Iniciar envío**. Puedes pausarlo o revocarlo cuando quieras.
+5. Abre el panel en Vercel, entra con `ADMIN_PASSWORD`, pulsa **Actualizar apps** y selecciona expresamente las apps permitidas.
+6. Las notificaciones **nuevas** de las apps activadas podrán almacenarse en MongoDB. El panel permite buscar, paginar, filtrar por teléfono y eliminar historial.
+
+Por defecto **todas las apps están bloqueadas**. La app solo lee título y texto después de verificar que la app fue autorizada. El servidor vuelve a comprobar el permiso antes de guardarlos. La app filtra mensajes de verificación reconocibles, pero no se puede garantizar la eliminación de toda información sensible; autoriza solo las apps realmente necesarias. Los registros se eliminan automáticamente pasados 30 días; los cambios del panel se sincronizan aproximadamente cada 30 segundos mientras el listener está activo y Android permite su ejecución. La cola local tiene capacidad limitada (hasta 150 registros).
+
+Los avisos de pagos son **texto de notificación, no confirmaciones bancarias**. No utilices el historial para verificar dinero recibido; verifica en la app bancaria original.
+
+## API
+
+| Método | Ruta | Uso | Autorización |
+|---|---|---|---|
+| GET | `/api/health` | Servicio activo | pública |
+| GET | `/api/health?db=1` | Ping a MongoDB | sesión admin |
+| POST | `/api/login` | Iniciar sesión del panel | contraseña admin |
+| POST | `/api/logout` | Salir | sesión |
+| GET / POST | `/api/apps` | Listar y activar/ignorar apps | sesión admin |
+| GET | `/api/device-config` | Reglas de apps autorizadas | Bearer INGEST_TOKEN |
+| POST | `/api/device-catalog` | Apps visibles del Android | Bearer INGEST_TOKEN |
+| POST | `/api/ingest` | Guardar nueva notificación autorizada | Bearer INGEST_TOKEN |
+| GET | `/api/notifications` | Historial y filtros | sesión admin o Bearer READ_TOKEN |
+| DELETE | `/api/notifications?app=...` | Borrar historial | sesión admin |
+| GET | `/api/stats` | Estadísticas | sesión admin o Bearer READ_TOKEN |
+
+## Pruebas
+
+Desde la raíz del proyecto: `npm test`. Las pruebas locales no sustituyen a pruebas reales con MongoDB Atlas, Vercel y Android.
+
+Este proyecto es para dispositivos propios o para los que tengas consentimiento informado. No está preparado para distribución pública multiusuario: para uso masivo necesitaría credenciales individuales por equipo, control de acceso más granular y limitación de intentos de login.
