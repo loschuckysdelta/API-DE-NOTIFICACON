@@ -1,30 +1,75 @@
-<!doctype html>
-<html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="theme-color" content="#130b1b"/><meta name="robots" content="noindex, nofollow"/>
-<title>NotiWeb · Los Chuckys</title>
-<link rel="stylesheet" href="/styles.css"/><script defer src="/app.js"></script></head>
-<body><div class="shell">
-  <header><div class="mark">🔔</div><div><span class="eyebrow">LOS CHUCKYS · SISTEMA PRIVADO</span><h1>Noti<span>Web</span></h1><p>Notificaciones Android sincronizadas con MongoDB</p></div></header>
-  <div id="message" class="feedback" role="status">Conectando con el servidor...</div>
-  <section id="login" class="loginBox"><h2>🔐 Iniciar sesión</h2><p>Este panel muestra mensajes privados de tus dispositivos. Entra con tu contraseña de administrador.</p>
-    <form id="loginForm"><label for="password">Contraseña del panel</label><input id="password" type="password" autocomplete="current-password" minlength="12" placeholder="Contraseña segura" required/><button type="submit">Entrar al panel</button></form>
-  </section>
-  <main id="panel" hidden>
-    <div class="toolbar"><h2>Centro de notificaciones</h2><div class="buttons"><button id="refresh" type="button">↻ Actualizar</button><button id="logout" type="button" class="outline">Cerrar sesión</button></div></div>
-    <div class="stats"><div><small>Total en MongoDB</small><strong id="count">0</strong></div><div><small>Últimas 24 horas</small><strong id="today">0</strong></div><div><small>Celulares con registros</small><strong id="devices">0</strong></div><div><small>Posibles pagos*</small><strong id="payments">0</strong></div></div>
-    <section class="permissionCard" aria-labelledby="permissionTitle">
-      <div class="permissionHeader"><div><h2 id="permissionTitle">⚙️ Control de aplicaciones</h2>
-        <p>Activa solamente las apps que deseas guardar en MongoDB. Las demás se ignoran en el teléfono. Los cambios pueden tardar hasta 30–60 segundos en sincronizarse.</p></div>
-        <button id="reloadApps" type="button" class="outline">↻ Actualizar apps</button></div>
-      <div class="appControls"><input id="appSearch" type="search" placeholder="Buscar WhatsApp, Lemon, Yape…" aria-label="Buscar aplicaciones" />
-      <div class="manualAdd"><input id="manualPackage" placeholder="Paquete: com.ejemplo.app" aria-label="Agregar paquete manual"/><button id="addApp" type="button">Agregar</button></div></div>
-      <p class="notice">Privacidad: todo empieza bloqueado. Solo se comparte el nombre de las apps instaladas para mostrar la lista; ningún contenido de notificación se envía hasta que actives la app. Los códigos de acceso se filtran.</p>
-      <div id="appList" class="appList" aria-live="polite"></div>
-    </section>
-    <div class="filters"><input id="filter" type="search" placeholder="Buscar aplicación, texto o remitente" aria-label="Buscar notificaciones"/><select id="deviceFilter" aria-label="Filtrar por celular"><option value="">Todos los celulares</option></select><select id="typeFilter" aria-label="Filtrar por tipo"><option value="">Todas</option><option value="payment">Posibles pagos</option><option value="general">Otras notificaciones</option></select></div><p class="notice">* Los importes y remitentes son extraídos del texto de una notificación. <b>NO confirman un pago real.</b> Verifica siempre en la aplicación oficial.</p>
-    <div class="listhead"><span id="shown">Mostrando 0</span><div class="buttons"><button id="previous" class="outline" type="button">Anterior</button><span id="pageLabel">Página 1</span><button id="next" class="outline" type="button">Siguiente</button></div></div><div id="notifications" class="stack" aria-live="polite"></div>
-    <footer><span>🔒 Acceso privado · historial automático de 30 días · códigos de verificación excluidos</span><button id="clear" class="danger" type="button">Borrar historial</button></footer>
-  </main>
-</div></body></html>
-
-.permissionCard{margin:26px 0 20px;padding:22px;background:var(--card);border:1px solid var(--line);border-radius:21px}.permissionHeader{display:flex;justify-content:space-between;gap:18px;align-items:center}.permissionHeader p{color:var(--muted);font-size:13px;line-height:1.5;max-width:650px}.permissionHeader button{flex-shrink:0}.appControls{display:flex;gap:12px;margin:14px 0}.appControls>input{flex:1}.manualAdd{display:flex;gap:8px;flex:1}.manualAdd button{white-space:nowrap}.appList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:440px;overflow:auto;padding:4px}.appItem{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:14px;padding:13px;background:#130d1c}.appName{font-weight:700;overflow-wrap:anywhere}.appDetail{display:block;color:var(--muted);font-size:11px;overflow-wrap:anywhere;margin-top:5px}.appRight{display:flex;align-items:center;gap:8px;flex-shrink:0}.appToggle{background:#483449;min-width:102px;padding:9px 12px}.appToggle.active{background:#166447}.appToggle:disabled{opacity:.5}.appDelete{background:transparent;border:1px solid #67445a;color:#ffbdcc;font-size:11px;padding:7px 8px}.appDelete:disabled{opacity:.5}.appState{font-size:12px;color:#ccb8db}.appItem.isActive{border-color:#358063}.appEmpty{padding:20px;color:var(--muted);grid-column:1/-1}.permissionCard .notice{margin:14px 0}@media(max-width:760px){.appList{grid-template-columns:1fr}.appControls,.permissionHeader{flex-direction:column;align-items:stretch}.appControls{display:grid}.manualAdd input{min-width:0}.appRight{flex-wrap:wrap;justify-content:end}}
+/* NotiWeb - interfaz privada, sin dependencias externas */
+:root { color-scheme: dark; --bg: #0c0715; --card: #181025; --card2: #21162f; --line: #39284b; --text: #f7f1ff; --muted: #bbaecb; --accent: #9c42d9; --success: #38a779; --danger: #ed6d8d; }
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; color: var(--text); background: radial-gradient(ellipse 900px 420px at 82% -7%, #412060, transparent 75%), var(--bg); font: 15px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+[hidden] { display:none!important; }
+.shell { max-width: 1150px; margin: 0 auto; padding: 26px clamp(14px, 4vw, 44px) 60px; }
+header { display:flex; gap:20px; align-items:center; padding: 24px 0 12px; }
+header .mark { display:grid; place-items:center; height:75px; width:75px; flex:0 0 auto; border-radius:23px; font-size:34px; background: #392050; box-shadow: inset 0 0 24px #63328a; }
+h1 { margin: 0; font-size: clamp(34px,5vw,51px); letter-spacing:-1.6px; line-height:1.15; }
+h1 span { color:#ce90ff; }
+.eyebrow { color:#d7a9f3; letter-spacing:2px; font-size:11px; font-weight:800; }
+header p { color:var(--muted); margin: 7px 0 0; }
+h2 { margin:0 0 10px; font-size: clamp(20px, 3vw, 26px); letter-spacing:-.5px; }
+h3 { margin:0; font-size:16px; }
+p { margin-top:5px; }
+.feedback { margin: 17px 0 25px; padding: 10px 15px; color: #e9dcf3; background: #241832; border: 1px solid #51366c; border-radius: 12px; min-height:43px; }
+.loginBox { max-width: 495px; margin:25px auto; border:1px solid var(--line); border-radius:20px; padding:28px; background:var(--card); box-shadow:0 16px 56px #0006; }
+.loginBox p {color:var(--muted);}
+.loginBox form { display:grid; gap:12px; }
+label,.fieldTitle { color:#ebdef7; font-size:13px; font-weight:650; }
+input,select { width:100%; min-width:0; color:var(--text); border:1px solid #584367; background:#100a1b; border-radius:10px; padding:12px 13px; font:inherit; outline:none; }
+input:focus-visible, select:focus-visible, button:focus-visible {outline:3px solid #b273f4;outline-offset:2px;}
+input::placeholder { color:#8f829d; }
+button { color:#fff; font:inherit; font-weight:700; background:#8030be; border:1px solid #9946d7; border-radius:10px; padding:11px 16px; cursor:pointer; }
+button:hover {filter:brightness(1.13);}
+button:disabled {cursor:not-allowed;opacity:.55;}
+button.outline { background:transparent; border:1px solid #75568f; }
+button.danger { background:#4c1b2c; border-color:#98506a; }
+.toolbar { display:flex;justify-content:space-between;align-items:center;gap:15px;margin:26px 0 16px; }
+.toolbar h2 { margin:0; }
+.buttons {display:flex;gap:9px;flex-wrap:wrap;align-items:center;}
+.stats { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px; }
+.stats>div { display:grid;gap:5px;padding:20px;border-radius:16px;border:1px solid var(--line);background:var(--card); }
+.stats small {font-size:12px;color:var(--muted);}
+.stats strong {font-size:32px;line-height:1.2;letter-spacing:-.6px;}
+.permissionCard { margin:25px 0 20px;padding:22px;background:var(--card);border:1px solid var(--line);border-radius:20px; }
+.permissionHeader {display:flex;justify-content:space-between;gap:18px;align-items:center;}
+.permissionHeader p {color:var(--muted);font-size:13px;line-height:1.5;max-width:650px;}
+.permissionHeader button {flex-shrink:0;}
+.appControls {display:grid;gap:10px;margin:19px 0 14px;}
+.manualAdd {margin-top:4px;background:var(--card2);padding:18px;border:1px solid var(--line);border-radius:15px;}
+.manualHeading {margin-bottom:13px;}
+.manualHeading h3 { color:#f3d8ff; }
+.manualHeading p,.formHelp {color:var(--muted);font-size:12px;line-height:1.5;margin:6px 0 0;}
+.manualFields {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) auto;gap:9px;align-items:end;}
+.manualFields>div {display:grid;gap:5px;}
+.manualFields button {white-space:nowrap;min-height:47px;}
+.notice {color:var(--muted);font-size:12px;line-height:1.5;margin:13px 0;}
+.appList {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:440px;overflow:auto;padding:4px;}
+.appItem {display:flex;align-items:center;justify-content:space-between;gap:11px;border:1px solid var(--line);border-radius:14px;padding:13px;background:#130d1c;}
+.appItem.isActive {border-color:#358063;}
+.appName {font-weight:750;overflow-wrap:anywhere;}
+.appDetail {display:block;color:var(--muted);font-size:11px;overflow-wrap:anywhere;margin-top:4px;}
+.appRight {display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.appToggle {background:#483449;min-width:96px;padding:8px 10px;}
+.appToggle.active {background:#166447;border-color:#32906a;}
+.appDelete {background:transparent;border:1px solid #67445a;color:#ffbdcc;font-size:11px;padding:7px 8px;}
+.appEmpty {padding:20px;color:var(--muted);grid-column:1/-1;}
+.filters {display:grid;grid-template-columns:2fr 1.1fr 1fr;gap:9px;margin:24px 0 8px;}
+.listhead {display:flex;align-items:center;justify-content:space-between;gap:12px;margin:19px 0 12px;color:var(--muted);font-size:12px;}
+.listhead button {padding:8px 12px;}
+.stack {display:grid;gap:11px;}
+.notification {background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 19px;}
+.notification .line {display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.notification time {font-size:12px;color:var(--muted);}
+.notification .app {font-weight:750;color:#d9a4ff;}
+.notification h3 {margin:9px 0 2px;font-size:17px;}
+.notification p {margin:4px 0 9px;white-space:pre-wrap;overflow-wrap:anywhere;}
+.payment {color:#ffe4a6;background:#463320;padding:8px 10px;border-radius:8px;font-size:12px;}
+.meta {color:var(--muted);font-size:11px;padding-top:8px;}
+.empty {border:1px dashed #654d79;border-radius:14px;padding:28px;color:var(--muted);text-align:center;}
+footer {display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px;margin-top:25px;padding-top:18px;border-top:1px solid var(--line);}
+@media(max-width:900px) {.stats{grid-template-columns:repeat(2,minmax(0,1fr));}.appList{grid-template-columns:1fr;}.manualFields{grid-template-columns:1fr 1fr;}.manualFields button{grid-column:1/-1;}}
+@media(max-width:640px) {.shell{padding:15px 14px 35px;}header{gap:12px;}header .mark{width:56px;height:56px;border-radius:16px;font-size:27px}.eyebrow{font-size:9px;letter-spacing:1px}.toolbar,.permissionHeader{align-items:stretch;flex-direction:column}.toolbar .buttons button{flex:1}.stats>div{padding:15px}.stats strong{font-size:28px}.permissionCard{padding:15px}.manualFields,.filters{grid-template-columns:1fr}.appItem{align-items:flex-start;gap:8px}.appRight{flex-wrap:wrap;justify-content:flex-end}.appToggle{min-width:80px}.listhead{align-items:flex-start;flex-direction:column}.notification .line{align-items:flex-start;flex-direction:column}footer{flex-direction:column;align-items:stretch}}

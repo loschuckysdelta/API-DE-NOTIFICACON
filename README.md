@@ -91,7 +91,7 @@ La versión web y la API funcionan en Vercel; **Vercel no puede leer notificacio
 3. Escribe la URL HTTPS de Vercel, tu `INGEST_TOKEN` y un nombre de teléfono.
 4. Abre los ajustes para conceder el **acceso a notificaciones** a NotiWeb y pulsa **Iniciar envío**. Puedes pausarlo o revocarlo cuando quieras.
 5. Abre el panel en Vercel, entra con `ADMIN_PASSWORD`, pulsa **Actualizar apps** y selecciona expresamente las apps permitidas.
-6. Las notificaciones **nuevas** de las apps activadas podrán almacenarse en MongoDB. El panel permite buscar, paginar, filtrar por teléfono y eliminar historial.
+6. Las notificaciones **nuevas** de las apps activadas podrán almacenarse en MongoDB. El panel permite buscar, paginar, filtrar por teléfono y eliminar historial. En **Control de aplicaciones → Agregar aplicación**, puedes añadir un nombre visible y el identificador real (package ID) de otra app Android. Se crea bloqueada; solo el botón **Permitir** habilita sus notificaciones.
 
 Por defecto **todas las apps están bloqueadas**. La app solo lee título y texto después de verificar que la app fue autorizada. El servidor vuelve a comprobar el permiso antes de guardarlos. La app filtra mensajes de verificación reconocibles, pero no se puede garantizar la eliminación de toda información sensible; autoriza solo las apps realmente necesarias. Los registros se eliminan automáticamente pasados 30 días; los cambios del panel se sincronizan aproximadamente cada 30 segundos mientras el listener está activo y Android permite su ejecución. La cola local tiene capacidad limitada (hasta 150 registros).
 
@@ -118,3 +118,15 @@ Los avisos de pagos son **texto de notificación, no confirmaciones bancarias**.
 Desde la raíz del proyecto: `npm test`. Las pruebas locales no sustituyen a pruebas reales con MongoDB Atlas, Vercel y Android.
 
 Este proyecto es para dispositivos propios o para los que tengas consentimiento informado. No está preparado para distribución pública multiusuario: para uso masivo necesitaría credenciales individuales por equipo, control de acceso más granular y limitación de intentos de login.
+
+## Nueva opción: agregar tus propias aplicaciones
+
+1. Inicia sesión en el panel y abre **Control de aplicaciones**.
+2. Busca la app primero: las instaladas en Android deben aparecer después de **Actualizar apps**.
+3. Si no aparece, escribe **Nombre** (por ejemplo, *Mi banco*) y **identificador real de paquete Android** (ejemplo ficticio `com.ejemplo.banco`; **no funciona como paquete real**). Haz clic en **Agregar aplicación**.
+4. Aparecerá en la lista como **Ignorar**. Pulsa **Permitir** solo si quieres recopilar sus nuevas notificaciones desde tu propio dispositivo. El nombre por sí solo no activa el lector ni instala la app.
+5. Para desactivarla pulsa **Ignorar**; puedes borrar el historial previo de esa aplicación con **Borrar datos**.
+
+**Corrección de estilos:** el archivo `public/styles.css` se ha reconstruido como CSS válido; corrige el panel que aparecía sin estilos en el teléfono.
+
+**Despliegue:** en el repositorio usa el contenido del ZIP en la raíz (`api/`, `lib/`, `public/`, etc.) y Vercel Root Directory `./`. Conserva tus variables de entorno privadas en Vercel; no están dentro del ZIP. Tras subir a GitHub, haz **Redeploy**.

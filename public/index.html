@@ -16,8 +16,19 @@
       <div class="permissionHeader"><div><h2 id="permissionTitle">⚙️ Control de aplicaciones</h2>
         <p>Activa solamente las apps que deseas guardar en MongoDB. Las demás se ignoran en el teléfono. Los cambios pueden tardar hasta 30–60 segundos en sincronizarse.</p></div>
         <button id="reloadApps" type="button" class="outline">↻ Actualizar apps</button></div>
-      <div class="appControls"><input id="appSearch" type="search" placeholder="Buscar WhatsApp, Lemon, Yape…" aria-label="Buscar aplicaciones" />
-      <div class="manualAdd"><input id="manualPackage" placeholder="Paquete: com.ejemplo.app" aria-label="Agregar paquete manual"/><button id="addApp" type="button">Agregar</button></div></div>
+      <div class="appControls">
+        <label for="appSearch" class="fieldTitle">Buscar en mis aplicaciones</label>
+        <input id="appSearch" type="search" placeholder="Buscar Lemon, Yape, otro banco…" aria-label="Buscar aplicaciones" />
+        <form id="manualAdd" class="manualAdd">
+          <div class="manualHeading"><h3>➕ Agregar aplicación</h3><p>Escribe el nombre y el identificador real de Android. No se activará automáticamente.</p></div>
+          <div class="manualFields">
+            <div><label for="manualName">Nombre que verás en el panel</label><input id="manualName" maxlength="120" required placeholder="Ej.: Mi banco" /></div>
+            <div><label for="manualPackage">Identificador de Android</label><input id="manualPackage" autocapitalize="off" autocomplete="off" spellcheck="false" required placeholder="Ej.: com.ejemplo.banco" /></div>
+            <button id="addApp" type="submit">Agregar aplicación</button>
+          </div>
+          <p class="formHelp">Si la aplicación ya está instalada y aparece en la lista de arriba, es mejor activarla directamente. Agregar un nombre no instala la app ni crea notificaciones.</p>
+        </form>
+      </div>
       <p class="notice">Privacidad: todo empieza bloqueado. Solo se comparte el nombre de las apps instaladas para mostrar la lista; ningún contenido de notificación se envía hasta que actives la app. Los códigos de acceso se filtran.</p>
       <div id="appList" class="appList" aria-live="polite"></div>
     </section>

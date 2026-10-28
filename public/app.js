@@ -162,11 +162,34 @@ async function deleteAppHistory(app) {
 }
 $('reloadApps').addEventListener('click', refreshApps);
 $('appSearch').addEventListener('input', renderApps);
-$('addApp').addEventListener('click', async () => {
+$('manualAdd').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (updatingApps) return;
+  const appName = $('manualName').value.trim();
   const appPackage = $('manualPackage').value.trim();
-  if (!/^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(appPackage)) {
-    showToast('Paquete inválido. Ejemplo: com.ejemplo.app'); return;
+  if (!appName || appName.length > 120) { showToast('Escribe un nombre válido (hasta 120 caracteres).'); return; }
+  if (!/^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(appPackage) || appPackage.length > 180) {
+    showToast('Identificador inválido. Usa el paquete real de Android, como com.ejemplo.banco.'); return;
   }
-  // Agregar manualmente no concede permiso automáticamente.
-  await setApp(appPackage, false); $('manualPackage').value = '';
+  if (applications.some(a => a.appPackage === appPackage)) {
+    $('appSearch').value = appPackage;
+    renderApps();
+    showToast('Esta aplicación ya está en la lista. Puedes permitirla o ignorarla allí.');
+    return;
+  }
+  updatingApps = true;
+  $('addApp').disabled = true;
+  try {
+    // Nunca activar una nueva aplicación sin el interruptor de autorización explícito.
+    await request('/api/apps', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appPackage, appName, enabled: false })
+    });
+    $('manualName').value = '';
+    $('manualPackage').value = '';
+    $('appSearch').value = appPackage;
+    showToast('Aplicación agregada en modo IGNORAR. Actívala solo si deseas guardar sus notificaciones.');
+    await refreshApps();
+  } catch (err) { showToast(err.message); }
+  finally { updatingApps = false; $('addApp').disabled = false; renderApps(); }
 });
